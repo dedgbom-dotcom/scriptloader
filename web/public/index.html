@@ -425,53 +425,7 @@ function init() {
 
 function generateLoader() {
   const origin = window.location.origin;
-  const code = `-- ================================================
--- ScriptHub Universal Loader
--- 1 loadstring untuk semua game yang terdaftar
--- Auto-detect game dari game.PlaceId
--- ================================================
-
-local HUB_URL = "${origin}/hub"
-
-local function loadHub()
-    local placeId = tostring(game.PlaceId)
-    local url = HUB_URL .. "?game=" .. placeId
-
-    local ok, result = pcall(game.HttpGet, game, url)
-
-    if not ok then
-        warn("[ScriptHub] Gagal connect ke server: " .. tostring(result))
-        return
-    end
-
-    -- Cek apakah response adalah error message
-    if result:sub(1, 2) == "--" then
-        local errMsg = result:match("^%-%- Error: (.+)") or result
-        warn("[ScriptHub] " .. errMsg)
-        pcall(function()
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "ScriptHub",
-                Text = errMsg,
-                Duration = 6
-            })
-        end)
-        return
-    end
-
-    -- Load dan jalankan script
-    local fn, parseErr = loadstring(result)
-    if not fn then
-        warn("[ScriptHub] Parse error: " .. tostring(parseErr))
-        return
-    end
-
-    local runOk, runErr = pcall(fn)
-    if not runOk then
-        warn("[ScriptHub] Runtime error: " .. tostring(runErr))
-    end
-end
-
-loadHub()`;
+  const code = `loadstring(game:HttpGet("${origin}/hub?game="..game.PlaceId))()`;
 
   document.getElementById('loader-full-code').textContent = code;
   document.getElementById('loader-empty-state').style.display = 'none';

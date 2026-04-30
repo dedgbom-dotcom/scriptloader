@@ -3,657 +3,147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ScriptLoader — Dashboard</title>
+<title>ScriptHub — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #080b10;
-    --bg2: #0d1117;
-    --bg3: #111720;
-    --border: #1e2a3a;
-    --border2: #243040;
-    --accent: #00d4ff;
-    --accent2: #7c3aed;
-    --green: #00ff88;
-    --red: #ff4444;
-    --yellow: #ffb700;
-    --text: #c9d8e8;
-    --text2: #6b8299;
-    --text3: #3d5269;
-    --card: #0d1421;
-    --card2: #111a28;
+    --bg: #080b10; --bg2: #0d1117; --bg3: #111720;
+    --border: #1e2a3a; --border2: #243040;
+    --accent: #00d4ff; --accent2: #7c3aed;
+    --green: #00ff88; --red: #ff4444; --yellow: #ffb700;
+    --text: #c9d8e8; --text2: #6b8299; --text3: #3d5269;
+    --card: #0d1421; --card2: #111a28;
     --glow: 0 0 20px rgba(0,212,255,0.15);
     --glow2: 0 0 30px rgba(124,58,237,0.2);
     --radius: 8px;
     --font-mono: 'Space Mono', monospace;
     --font-ui: 'Syne', sans-serif;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-ui);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Scanlines overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Grid background */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: 
-      linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ---- LOGIN SCREEN ---- */
-  #login-screen {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-
-  .login-box {
-    background: var(--card);
-    border: 1px solid var(--border2);
-    border-radius: 12px;
-    padding: 48px 40px;
-    width: 360px;
-    box-shadow: var(--glow), var(--glow2);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .login-box::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent2), var(--accent), var(--green));
-  }
-
-  .login-logo {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-
-  .login-logo h1 {
-    font-size: 28px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.5px;
-  }
-
-  .login-logo p {
-    color: var(--text2);
-    font-size: 13px;
-    font-family: var(--font-mono);
-    margin-top: 4px;
-  }
-
-  .field {
-    margin-bottom: 16px;
-  }
-
-  .field label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text2);
-    margin-bottom: 8px;
-    font-family: var(--font-mono);
-  }
-
-  .field input, .field select, .field textarea {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 10px 14px;
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .field textarea {
-    resize: vertical;
-    min-height: 120px;
-  }
-
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(0,212,255,0.1);
-  }
-
-  .btn {
-    padding: 10px 20px;
-    border-radius: var(--radius);
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-ui);
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    transition: all 0.2s;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    color: white;
-  }
-
-  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); box-shadow: var(--glow); }
-
-  .btn-success {
-    background: rgba(0,255,136,0.12);
-    color: var(--green);
-    border: 1px solid rgba(0,255,136,0.3);
-  }
-  .btn-success:hover { background: rgba(0,255,136,0.2); }
-
-  .btn-danger {
-    background: rgba(255,68,68,0.1);
-    color: var(--red);
-    border: 1px solid rgba(255,68,68,0.3);
-  }
-  .btn-danger:hover { background: rgba(255,68,68,0.2); }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text2);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
-
-  .btn-sm { padding: 6px 12px; font-size: 11px; }
-  .btn-full { width: 100%; }
-
-  /* ---- LAYOUT ---- */
-  #app {
-    display: none;
-    min-height: 100vh;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Sidebar */
-  .sidebar {
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    width: 220px;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    z-index: 100;
-  }
-
-  .sidebar-logo {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .sidebar-logo h1 {
-    font-size: 18px;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .sidebar-logo span {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text3);
-    display: block;
-    margin-top: 2px;
-  }
-
-  .sidebar-nav {
-    padding: 16px 10px;
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  .nav-group {
-    margin-bottom: 20px;
-  }
-
-  .nav-group-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--text3);
-    padding: 0 10px;
-    margin-bottom: 6px;
-    font-family: var(--font-mono);
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--text2);
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.15s;
-    border: 1px solid transparent;
-    margin-bottom: 2px;
-    user-select: none;
-  }
-
-  .nav-item:hover { color: var(--text); background: var(--bg3); }
-  
-  .nav-item.active {
-    color: var(--accent);
-    background: rgba(0,212,255,0.06);
-    border-color: rgba(0,212,255,0.15);
-  }
-
-  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
-
-  .sidebar-footer {
-    padding: 16px 20px;
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--text3);
-    font-family: var(--font-mono);
-  }
-
-  /* Main Content */
-  .main {
-    margin-left: 220px;
-    min-height: 100vh;
-  }
-
-  .topbar {
-    height: 56px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    background: var(--bg2);
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-
-  .topbar-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .content {
-    padding: 28px;
-  }
-
-  /* ---- PANELS ---- */
-  .panel { display: none; }
-  .panel.active { display: block; }
-
-  /* ---- STAT CARDS ---- */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-
-  .stat-card:hover { border-color: var(--border2); }
-
-  .stat-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-  }
-
-  .stat-card.cyan::after { background: var(--accent); }
-  .stat-card.purple::after { background: var(--accent2); }
-  .stat-card.green::after { background: var(--green); }
-  .stat-card.yellow::after { background: var(--yellow); }
-
-  .stat-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text3);
-    font-family: var(--font-mono);
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-size: 32px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .stat-card.cyan .stat-value { color: var(--accent); }
-  .stat-card.purple .stat-value { color: var(--accent2); }
-  .stat-card.green .stat-value { color: var(--green); }
-  .stat-card.yellow .stat-value { color: var(--yellow); }
-
-  /* ---- TABLE ---- */
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-
-  .section-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-    font-family: var(--font-mono);
-  }
-
-  .table-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-
-  thead tr {
-    background: var(--bg3);
-    border-bottom: 1px solid var(--border);
-  }
-
-  th {
-    padding: 10px 14px;
-    text-align: left;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text3);
-    font-family: var(--font-mono);
-  }
-
-  td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-mono);
-    vertical-align: middle;
-  }
-
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.01); }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    font-family: var(--font-mono);
-    letter-spacing: 0.5px;
-  }
-
-  .badge-green { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
-  .badge-red { background: rgba(255,68,68,0.1); color: var(--red); border: 1px solid rgba(255,68,68,0.2); }
-  .badge-yellow { background: rgba(255,183,0,0.1); color: var(--yellow); border: 1px solid rgba(255,183,0,0.2); }
-  .badge-cyan { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.2); }
-  .badge-purple { background: rgba(124,58,237,0.1); color: #a78bfa; border: 1px solid rgba(124,58,237,0.2); }
-
-  .actions { display: flex; gap: 6px; align-items: center; }
-
-  /* ---- MODAL ---- */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 500;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--card);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 28px;
-    width: 480px;
-    max-width: 95vw;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5), var(--glow);
-  }
-
-  .modal-title {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .modal-close {
-    background: none;
-    border: none;
-    color: var(--text2);
-    cursor: pointer;
-    font-size: 18px;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-  .modal-close:hover { color: var(--red); }
-
-  .modal-footer {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-  }
-
-  /* ---- CODE BOX ---- */
-  .code-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--green);
-    overflow-x: auto;
-    white-space: pre;
-    max-height: 200px;
-    overflow-y: auto;
-    line-height: 1.6;
-    margin-top: 8px;
-  }
-
-  /* ---- LOADER TEMPLATE ---- */
-  .loader-info {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-
-  .loader-info h3 {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: var(--accent);
-    font-family: var(--font-mono);
-  }
-
-  /* ---- TOAST ---- */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .toast-item {
-    background: var(--card2);
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 13px;
-    font-family: var(--font-mono);
-    border-left: 3px solid var(--accent);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    animation: slideIn 0.3s ease;
-    max-width: 300px;
-  }
-
-  .toast-item.error { border-left-color: var(--red); color: var(--red); }
-  .toast-item.success { border-left-color: var(--green); color: var(--green); }
-
-  @keyframes slideIn {
-    from { transform: translateX(20px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-
-  /* ---- OBFUSCATOR PANEL ---- */
-  .obf-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 16px;
-  }
-
-  .obf-pane {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .obf-pane textarea {
-    flex: 1;
-    min-height: 400px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text);
-    resize: none;
-    outline: none;
-    line-height: 1.6;
-    transition: border-color 0.2s;
-  }
-
-  .obf-pane textarea:focus { border-color: var(--accent); }
-
-  .checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text2);
-    cursor: pointer;
-  }
-
-  .checkbox-row input[type=checkbox] {
-    accent-color: var(--accent);
-    width: 14px;
-    height: 14px;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text3);
-    font-family: var(--font-mono);
-    font-size: 12px;
-  }
-
-  .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-ui); min-height: 100vh; overflow-x: hidden; }
+  body::before { content:''; position:fixed; inset:0; background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px); pointer-events:none; z-index:0; }
+  body::after { content:''; position:fixed; inset:0; background-image: linear-gradient(rgba(0,212,255,0.02) 1px,transparent 1px), linear-gradient(90deg,rgba(0,212,255,0.02) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+
+  /* LOGIN */
+  #login-screen { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:1000; }
+  .login-box { background:var(--card); border:1px solid var(--border2); border-radius:12px; padding:48px 40px; width:360px; box-shadow:var(--glow),var(--glow2); position:relative; overflow:hidden; }
+  .login-box::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent2),var(--accent),var(--green)); }
+  .login-logo { text-align:center; margin-bottom:32px; }
+  .login-logo h1 { font-size:28px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .login-logo p { color:var(--text2); font-size:13px; font-family:var(--font-mono); margin-top:4px; }
+  .field { margin-bottom:16px; }
+  .field label { display:block; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text2); margin-bottom:8px; font-family:var(--font-mono); }
+  .field input, .field select, .field textarea { width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; color:var(--text); font-family:var(--font-mono); font-size:13px; outline:none; transition:border-color .2s,box-shadow .2s; }
+  .field textarea { resize:vertical; min-height:120px; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,212,255,0.1); }
+  .btn { padding:10px 20px; border-radius:var(--radius); border:none; cursor:pointer; font-family:var(--font-ui); font-weight:700; font-size:13px; letter-spacing:0.5px; transition:all .2s; }
+  .btn-primary { background:linear-gradient(135deg,var(--accent2),var(--accent)); color:white; }
+  .btn-primary:hover { opacity:.85; transform:translateY(-1px); box-shadow:var(--glow); }
+  .btn-success { background:rgba(0,255,136,0.12); color:var(--green); border:1px solid rgba(0,255,136,0.3); }
+  .btn-success:hover { background:rgba(0,255,136,0.2); }
+  .btn-danger { background:rgba(255,68,68,0.1); color:var(--red); border:1px solid rgba(255,68,68,0.3); }
+  .btn-danger:hover { background:rgba(255,68,68,0.2); }
+  .btn-ghost { background:transparent; color:var(--text2); border:1px solid var(--border); }
+  .btn-ghost:hover { border-color:var(--border2); color:var(--text); }
+  .btn-sm { padding:6px 12px; font-size:11px; }
+  .btn-full { width:100%; }
+
+  /* LAYOUT */
+  #app { display:none; min-height:100vh; position:relative; z-index:1; }
+  .sidebar { position:fixed; left:0; top:0; bottom:0; width:210px; background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; z-index:100; }
+  .sidebar-logo { padding:20px 20px 16px; border-bottom:1px solid var(--border); }
+  .sidebar-logo h1 { font-size:18px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .sidebar-logo span { font-family:var(--font-mono); font-size:10px; color:var(--text3); display:block; margin-top:2px; }
+  .sidebar-nav { padding:16px 10px; flex:1; overflow-y:auto; }
+  .nav-group { margin-bottom:20px; }
+  .nav-group-label { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); padding:0 10px; margin-bottom:6px; font-family:var(--font-mono); }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:6px; cursor:pointer; color:var(--text2); font-size:13px; font-weight:600; transition:all .15s; border:1px solid transparent; margin-bottom:2px; user-select:none; }
+  .nav-item:hover { color:var(--text); background:var(--bg3); }
+  .nav-item.active { color:var(--accent); background:rgba(0,212,255,0.06); border-color:rgba(0,212,255,0.15); }
+  .nav-icon { font-size:15px; width:18px; text-align:center; }
+  .sidebar-footer { padding:16px 20px; border-top:1px solid var(--border); font-size:11px; color:var(--text3); font-family:var(--font-mono); }
+  .main { margin-left:210px; min-height:100vh; }
+  .topbar { height:56px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 28px; background:var(--bg2); position:sticky; top:0; z-index:50; }
+  .topbar-title { font-size:16px; font-weight:700; color:var(--text); }
+  .topbar-right { display:flex; align-items:center; gap:12px; }
+  .status-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .content { padding:28px; }
+
+  /* PANELS */
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  /* DASHBOARD — compact top row */
+  .dash-top { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; position:relative; overflow:hidden; transition:border-color .2s; }
+  .stat-card:hover { border-color:var(--border2); }
+  .stat-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; }
+  .stat-card.cyan::after { background:var(--accent); }
+  .stat-card.purple::after { background:var(--accent2); }
+  .stat-card.green::after { background:var(--green); }
+  .stat-card.yellow::after { background:var(--yellow); }
+  .stat-label { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text3); font-family:var(--font-mono); margin-bottom:6px; }
+  .stat-value { font-size:28px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1; }
+  .stat-card.cyan .stat-value { color:var(--accent); }
+  .stat-card.purple .stat-value { color:var(--accent2); }
+  .stat-card.green .stat-value { color:var(--green); }
+  .stat-card.yellow .stat-value { color:var(--yellow); }
+
+  /* HUB LOADER BOX */
+  .hub-box { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; }
+  .hub-box h3 { font-size:12px; font-weight:700; margin-bottom:10px; color:var(--accent); font-family:var(--font-mono); letter-spacing:.5px; }
+  .hub-url { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; font-family:var(--font-mono); font-size:12px; color:var(--green); margin-bottom:10px; word-break:break-all; }
+  .hub-loader-oneliner { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; font-family:var(--font-mono); font-size:11px; color:var(--accent); word-break:break-all; cursor:pointer; transition:border-color .2s; }
+  .hub-loader-oneliner:hover { border-color:var(--accent); }
+  .hub-hint { font-size:11px; color:var(--text3); font-family:var(--font-mono); margin-top:6px; }
+
+  /* TABLE */
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .section-title { font-size:14px; font-weight:700; color:var(--text); font-family:var(--font-mono); }
+  .table-wrap { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:24px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  thead tr { background:var(--bg3); border-bottom:1px solid var(--border); }
+  th { padding:10px 14px; text-align:left; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text3); font-family:var(--font-mono); }
+  td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text); font-family:var(--font-mono); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.01); }
+  .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700; font-family:var(--font-mono); letter-spacing:.5px; }
+  .badge-green { background:rgba(0,255,136,0.1); color:var(--green); border:1px solid rgba(0,255,136,0.2); }
+  .badge-red { background:rgba(255,68,68,0.1); color:var(--red); border:1px solid rgba(255,68,68,0.2); }
+  .badge-yellow { background:rgba(255,183,0,0.1); color:var(--yellow); border:1px solid rgba(255,183,0,0.2); }
+  .badge-cyan { background:rgba(0,212,255,0.1); color:var(--accent); border:1px solid rgba(0,212,255,0.2); }
+  .actions { display:flex; gap:6px; align-items:center; }
+
+  /* MODAL */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:500; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--card); border:1px solid var(--border2); border-radius:10px; padding:28px; width:480px; max-width:95vw; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.5),var(--glow); }
+  .modal-title { font-size:16px; font-weight:700; margin-bottom:24px; color:var(--text); display:flex; align-items:center; justify-content:space-between; }
+  .modal-close { background:none; border:none; color:var(--text2); cursor:pointer; font-size:18px; padding:2px 6px; border-radius:4px; }
+  .modal-close:hover { color:var(--red); }
+  .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; padding-top:20px; border-top:1px solid var(--border); }
+
+  /* CODE BOX */
+  .code-box { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:14px; font-family:var(--font-mono); font-size:11px; color:var(--green); overflow-x:auto; white-space:pre; max-height:300px; overflow-y:auto; line-height:1.6; margin-top:8px; cursor:pointer; }
+  .code-box:hover { border-color:var(--accent); }
+
+  /* OBFUSCATOR */
+  .obf-layout { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+  .obf-pane { display:flex; flex-direction:column; gap:8px; }
+  .obf-pane textarea { flex:1; min-height:400px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:14px; font-family:var(--font-mono); font-size:12px; color:var(--text); resize:none; outline:none; line-height:1.6; transition:border-color .2s; }
+  .obf-pane textarea:focus { border-color:var(--accent); }
+
+  /* TOAST */
+  #toast { position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+  .toast-item { background:var(--card2); border-radius:8px; padding:12px 16px; font-size:13px; font-family:var(--font-mono); border-left:3px solid var(--accent); box-shadow:0 4px 20px rgba(0,0,0,0.4); animation:slideIn .3s ease; max-width:300px; }
+  .toast-item.error { border-left-color:var(--red); color:var(--red); }
+  .toast-item.success { border-left-color:var(--green); color:var(--green); }
+  @keyframes slideIn { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
+  .empty-state { text-align:center; padding:40px 20px; color:var(--text3); font-family:var(--font-mono); font-size:12px; }
+  .empty-state .icon { font-size:32px; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -662,7 +152,7 @@
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">
-      <h1>⚡ ScriptLoader</h1>
+      <h1>⚡ ScriptHub</h1>
       <p>// admin dashboard</p>
     </div>
     <div class="field">
@@ -675,50 +165,43 @@
 
 <!-- APP -->
 <div id="app">
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-logo">
-      <h1>⚡ ScriptLoader</h1>
-      <span>// platform v1.0</span>
+      <h1>⚡ ScriptHub</h1>
+      <span>// hub edition v2</span>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-group">
         <div class="nav-group-label">Overview</div>
-        <div class="nav-item active" onclick="showPanel('dashboard', this)">
+        <div class="nav-item active" onclick="showPanel('dashboard',this)">
           <span class="nav-icon">📊</span> Dashboard
         </div>
-        <div class="nav-item" onclick="showPanel('logs', this)">
+        <div class="nav-item" onclick="showPanel('logs',this)">
           <span class="nav-icon">📋</span> Execute Logs
         </div>
       </div>
       <div class="nav-group">
         <div class="nav-group-label">Management</div>
-        <div class="nav-item" onclick="showPanel('games', this)">
+        <div class="nav-item" onclick="showPanel('games',this)">
           <span class="nav-icon">🎮</span> Games
         </div>
-        <div class="nav-item" onclick="showPanel('scripts', this)">
+        <div class="nav-item" onclick="showPanel('scripts',this)">
           <span class="nav-icon">📜</span> Scripts
-        </div>
-        <div class="nav-item" onclick="showPanel('keys', this)">
-          <span class="nav-icon">🔑</span> Key System
         </div>
       </div>
       <div class="nav-group">
         <div class="nav-group-label">Tools</div>
-        <div class="nav-item" onclick="showPanel('obfuscator', this)">
+        <div class="nav-item" onclick="showPanel('obfuscator',this)">
           <span class="nav-icon">🔐</span> Obfuscator
         </div>
-        <div class="nav-item" onclick="showPanel('loader', this)">
-          <span class="nav-icon">💾</span> Loader Template
+        <div class="nav-item" onclick="showPanel('loader',this)">
+          <span class="nav-icon">💾</span> Hub Loader
         </div>
       </div>
     </nav>
-    <div class="sidebar-footer">
-      Based on Prometheus by<br>Elias Oelschner
-    </div>
+    <div class="sidebar-footer">Based on Prometheus<br>by Elias Oelschner</div>
   </div>
 
-  <!-- Main -->
   <div class="main">
     <div class="topbar">
       <span class="topbar-title" id="topbar-title">Dashboard</span>
@@ -732,26 +215,22 @@
 
     <div class="content">
 
-      <!-- DASHBOARD PANEL -->
+      <!-- DASHBOARD -->
       <div class="panel active" id="panel-dashboard">
-        <div class="stats-grid">
-          <div class="stat-card cyan">
-            <div class="stat-label">Total Keys</div>
-            <div class="stat-value" id="s-totalKeys">—</div>
-          </div>
-          <div class="stat-card green">
-            <div class="stat-label">Active Keys</div>
-            <div class="stat-value" id="s-activeKeys">—</div>
-          </div>
+        <div class="stats-row">
           <div class="stat-card purple">
             <div class="stat-label">Total Scripts</div>
             <div class="stat-value" id="s-totalScripts">—</div>
           </div>
-          <div class="stat-card yellow">
-            <div class="stat-label">Games</div>
-            <div class="stat-value" id="s-totalGames">—</div>
+          <div class="stat-card green">
+            <div class="stat-label">Active Scripts</div>
+            <div class="stat-value" id="s-activeScripts">—</div>
           </div>
           <div class="stat-card cyan">
+            <div class="stat-label">Games Registered</div>
+            <div class="stat-value" id="s-totalGames">—</div>
+          </div>
+          <div class="stat-card yellow">
             <div class="stat-label">Total Executions</div>
             <div class="stat-value" id="s-totalExec">—</div>
           </div>
@@ -759,16 +238,24 @@
             <div class="stat-label">Exec Today</div>
             <div class="stat-value" id="s-todayExec">—</div>
           </div>
+          <div class="stat-card cyan">
+            <div class="stat-label">Hub Status</div>
+            <div class="stat-value" style="font-size:16px;padding-top:4px;color:var(--green)">LIVE ●</div>
+          </div>
         </div>
 
-        <div class="loader-info">
-          <h3>📡 Loader Endpoint</h3>
-          <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Gunakan URL ini di script Roblox loader kamu:</p>
-          <div class="code-box" id="endpoint-url">http://localhost:3000/load?key=KEY&game=PLACE_ID&hwid=HWID</div>
+        <div class="hub-box">
+          <h3>📡 HUB ENDPOINT — 1 loadstring untuk semua game</h3>
+          <div class="hub-url" id="hub-endpoint-url">loading...</div>
+          <div style="font-size:11px;color:var(--text2);font-family:var(--font-mono);margin-bottom:8px;">
+            Copy loadstring di bawah → paste ke executor. Otomatis deteksi game dari <code style="color:var(--accent)">game.PlaceId</code>
+          </div>
+          <div class="hub-loader-oneliner" id="hub-oneliner" onclick="copyOneliner()" title="Click to copy">loading...</div>
+          <div class="hub-hint">↑ Click untuk copy · Server otomatis kirim script sesuai game yang kamu mainkan</div>
         </div>
       </div>
 
-      <!-- GAMES PANEL -->
+      <!-- GAMES -->
       <div class="panel" id="panel-games">
         <div class="section-header">
           <span class="section-title">// games registered</span>
@@ -776,17 +263,15 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr>
-              <th>Name</th><th>Place ID</th><th>Description</th><th>Status</th><th>Created</th><th>Actions</th>
-            </tr></thead>
+            <thead><tr><th>Name</th><th>Place ID</th><th>Description</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
             <tbody id="games-tbody">
-              <tr><td colspan="6" class="empty-state"><div class="icon">🎮</div>Belum ada game. Tambah game dulu.</td></tr>
+              <tr><td colspan="6" class="empty-state"><div class="icon">🎮</div>Belum ada game.</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- SCRIPTS PANEL -->
+      <!-- SCRIPTS -->
       <div class="panel" id="panel-scripts">
         <div class="section-header">
           <span class="section-title">// scripts</span>
@@ -794,35 +279,15 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr>
-              <th>Name</th><th>Game</th><th>Key Required</th><th>Obfuscated</th><th>Executions</th><th>Status</th><th>Actions</th>
-            </tr></thead>
+            <thead><tr><th>Name</th><th>Game</th><th>Obfuscated</th><th>Executions</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="scripts-tbody">
-              <tr><td colspan="7" class="empty-state"><div class="icon">📜</div>Belum ada script.</td></tr>
+              <tr><td colspan="6" class="empty-state"><div class="icon">📜</div>Belum ada script.</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- KEYS PANEL -->
-      <div class="panel" id="panel-keys">
-        <div class="section-header">
-          <span class="section-title">// key system</span>
-          <button class="btn btn-success btn-sm" onclick="openModal('modal-gen-key')">+ Generate Keys</button>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>Key</th><th>Game</th><th>HWID Bound</th><th>Uses</th><th>Expires</th><th>Status</th><th>Actions</th>
-            </tr></thead>
-            <tbody id="keys-tbody">
-              <tr><td colspan="7" class="empty-state"><div class="icon">🔑</div>Belum ada key.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- LOGS PANEL -->
+      <!-- LOGS -->
       <div class="panel" id="panel-logs">
         <div class="section-header">
           <span class="section-title">// execute logs (200 terbaru)</span>
@@ -830,17 +295,15 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr>
-              <th>Time</th><th>Game</th><th>Key Used</th><th>HWID</th><th>IP</th>
-            </tr></thead>
+            <thead><tr><th>Time</th><th>Game</th><th>IP</th></tr></thead>
             <tbody id="logs-tbody">
-              <tr><td colspan="5" class="empty-state"><div class="icon">📋</div>Belum ada log.</td></tr>
+              <tr><td colspan="3" class="empty-state"><div class="icon">📋</div>Belum ada log.</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- OBFUSCATOR PANEL -->
+      <!-- OBFUSCATOR -->
       <div class="panel" id="panel-obfuscator">
         <div class="section-header">
           <span class="section-title">// prometheus obfuscator</span>
@@ -861,59 +324,43 @@
           </div>
           <div class="obf-pane">
             <div class="section-title" style="font-size:11px;" id="obf-output-label">OUTPUT</div>
-            <textarea id="obf-output" readonly placeholder="-- Output obfuscated akan muncul di sini..."></textarea>
+            <textarea id="obf-output" readonly placeholder="-- Output akan muncul di sini..."></textarea>
             <button class="btn btn-ghost btn-sm" onclick="copyObf()">📋 Copy Output</button>
           </div>
         </div>
       </div>
 
-      <!-- LOADER TEMPLATE PANEL -->
+      <!-- HUB LOADER TEMPLATE -->
       <div class="panel" id="panel-loader">
         <div class="section-header">
-          <span class="section-title">// roblox loader template</span>
-          <button class="btn btn-ghost btn-sm" onclick="copyLoader()">📋 Copy Loader</button>
+          <span class="section-title">// hub loader template</span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="copyOneliner()">📋 Copy One-liner</button>
+            <button class="btn btn-ghost btn-sm" onclick="copyFullLoader()">📋 Copy Full Script</button>
+          </div>
         </div>
 
-        <div class="loader-info">
-          <h3>📖 Cara Pakai</h3>
-          <p style="font-size:12px;color:var(--text2);line-height:1.7;">
-            1. Copy loader script di bawah<br>
-            2. Ganti <code style="color:var(--accent)">YOUR_DOMAIN</code> dengan domain/IP server kamu<br>
-            3. Ganti <code style="color:var(--accent)">YOUR_PLACE_ID</code> dengan Place ID game Roblox<br>
-            4. Paste ke executor atau jadikan LocalScript<br>
-            5. User perlu punya key yang valid
-          </p>
+        <div class="hub-box" style="margin-bottom:16px;">
+          <h3>⚡ ONE-LINER — Paste langsung ke executor</h3>
+          <div class="hub-loader-oneliner" id="loader-oneliner-2" onclick="copyOneliner()" title="Click to copy">loading...</div>
+          <div class="hub-hint" style="margin-top:6px;">↑ Cukup 1 baris ini. Auto-detect game dari PlaceId.</div>
         </div>
 
-        <div class="section-title" style="font-size:11px;margin-bottom:8px;">LOADER SCRIPT (Universal — 1 untuk semua game)</div>
-        <div class="code-box" id="loader-code" style="max-height:500px;cursor:pointer;" onclick="copyLoader()">-- Loading...</div>
+        <div class="section-title" style="font-size:11px;margin-bottom:8px;">FULL SCRIPT (dengan error handling)</div>
+        <div class="code-box" id="loader-full-code" onclick="copyFullLoader()">-- Loading...</div>
       </div>
 
-    </div><!-- /content -->
-  </div><!-- /main -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
 <!-- MODALS -->
-
-<!-- Add Game -->
 <div class="modal-overlay" id="modal-add-game">
   <div class="modal">
-    <div class="modal-title">
-      🎮 Tambah Game
-      <button class="modal-close" onclick="closeModal('modal-add-game')">✕</button>
-    </div>
-    <div class="field">
-      <label>Nama Game</label>
-      <input type="text" id="game-name" placeholder="Blox Fruits, Arsenal, dll">
-    </div>
-    <div class="field">
-      <label>Roblox Place ID</label>
-      <input type="number" id="game-placeid" placeholder="2753915549">
-    </div>
-    <div class="field">
-      <label>Deskripsi (opsional)</label>
-      <input type="text" id="game-desc" placeholder="Script untuk game ini...">
-    </div>
+    <div class="modal-title">🎮 Tambah Game <button class="modal-close" onclick="closeModal('modal-add-game')">✕</button></div>
+    <div class="field"><label>Nama Game</label><input type="text" id="game-name" placeholder="Blox Fruits, Arsenal, dll"></div>
+    <div class="field"><label>Roblox Place ID</label><input type="number" id="game-placeid" placeholder="2753915549"></div>
+    <div class="field"><label>Deskripsi (opsional)</label><input type="text" id="game-desc" placeholder="Keterangan game..."></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-game')">Batal</button>
       <button class="btn btn-success" onclick="addGame()">+ Tambah Game</button>
@@ -921,35 +368,19 @@
   </div>
 </div>
 
-<!-- Add Script -->
 <div class="modal-overlay" id="modal-add-script">
   <div class="modal" style="width:580px;">
-    <div class="modal-title">
-      📜 Upload Script
-      <button class="modal-close" onclick="closeModal('modal-add-script')">✕</button>
-    </div>
-    <div class="field">
-      <label>Nama Script</label>
-      <input type="text" id="script-name" placeholder="Auto Farm, ESP, dll">
-    </div>
+    <div class="modal-title">📜 Upload Script <button class="modal-close" onclick="closeModal('modal-add-script')">✕</button></div>
+    <div class="field"><label>Nama Script</label><input type="text" id="script-name" placeholder="Auto Farm, ESP, dll"></div>
     <div class="field">
       <label>Game</label>
-      <select id="script-game">
-        <option value="">-- Pilih Game --</option>
-      </select>
+      <select id="script-game"><option value="">-- Pilih Game --</option></select>
     </div>
-    <div class="field">
-      <label>Kode Lua</label>
-      <textarea id="script-code" placeholder="-- Paste script Lua kamu di sini..." style="min-height:180px;"></textarea>
-    </div>
-    <div style="display:flex;gap:20px;margin-bottom:16px;">
-      <label class="checkbox-row">
-        <input type="checkbox" id="script-obf" checked>
+    <div class="field"><label>Kode Lua</label><textarea id="script-code" placeholder="-- Paste script Lua kamu di sini..." style="min-height:180px;"></textarea></div>
+    <div style="display:flex;gap:20px;margin-bottom:16px;align-items:center;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;">
+        <input type="checkbox" id="script-obf" checked style="accent-color:var(--accent);width:14px;height:14px;">
         Obfuscate dengan Prometheus
-      </label>
-      <label class="checkbox-row">
-        <input type="checkbox" id="script-key" checked>
-        Wajib Key
       </label>
     </div>
     <div class="field" id="obf-preset-wrap">
@@ -968,50 +399,12 @@
   </div>
 </div>
 
-<!-- Generate Keys -->
-<div class="modal-overlay" id="modal-gen-key">
-  <div class="modal">
-    <div class="modal-title">
-      🔑 Generate Keys
-      <button class="modal-close" onclick="closeModal('modal-gen-key')">✕</button>
-    </div>
-    <div class="field">
-      <label>Jumlah Keys</label>
-      <input type="number" id="key-count" value="1" min="1" max="100">
-    </div>
-    <div class="field">
-      <label>Game (opsional — kosong = semua game)</label>
-      <select id="key-game">
-        <option value="">Semua Game</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Prefix Key</label>
-      <input type="text" id="key-prefix" value="SCR" placeholder="SCR">
-    </div>
-    <div class="field">
-      <label>Expire (hari, kosong = permanent)</label>
-      <input type="number" id="key-expire" placeholder="30">
-    </div>
-    <div class="field">
-      <label>Note/Catatan</label>
-      <input type="text" id="key-note" placeholder="Untuk siapa key ini...">
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-gen-key')">Batal</button>
-      <button class="btn btn-success" onclick="generateKeys()">✨ Generate</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
 <div id="toast"></div>
 
 <script>
 let ADMIN_TOKEN = '';
 let gamesCache = [];
 
-// ---- AUTH ----
 function login() {
   const t = document.getElementById('login-token').value.trim();
   if (!t) return toast('Token tidak boleh kosong', 'error');
@@ -1020,10 +413,7 @@ function login() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     init();
-  }).catch(() => {
-    ADMIN_TOKEN = '';
-    toast('Token salah!', 'error');
-  });
+  }).catch(() => { ADMIN_TOKEN = ''; toast('Token salah!', 'error'); });
 }
 
 function logout() {
@@ -1033,56 +423,99 @@ function logout() {
   document.getElementById('login-token').value = '';
 }
 
-// ---- INIT ----
 function init() {
   loadStats();
   loadGames();
-  updateClock();
-  setInterval(updateClock, 1000);
-  updateEndpointUrl();
-  renderLoaderCode();
-}
-
-function updateClock() {
+  setInterval(() => document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('id-ID'), 1000);
   document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('id-ID');
+  renderHubInfo();
 }
 
-function updateEndpointUrl() {
+function renderHubInfo() {
   const origin = window.location.origin;
-  document.getElementById('endpoint-url').textContent = 
-    `${origin}/load?key=KEY_DISINI&game=PLACE_ID&hwid=HWID_OPTIONAL`;
+  const hubUrl = `${origin}/hub?game=PLACE_ID`;
+  const oneliner = `loadstring(game:HttpGet("${origin}/hub?game="..game.PlaceId))()`;
+  document.getElementById('hub-endpoint-url').textContent = hubUrl;
+  document.getElementById('hub-oneliner').textContent = oneliner;
+  if (document.getElementById('loader-oneliner-2'))
+    document.getElementById('loader-oneliner-2').textContent = oneliner;
+  renderFullLoader(origin);
 }
 
-// ---- API ----
+function renderFullLoader(origin) {
+  origin = origin || window.location.origin;
+  const code = `-- ================================================
+-- ScriptHub Universal Loader
+-- 1 loadstring untuk semua game yang terdaftar
+-- Auto-detect game dari game.PlaceId
+-- ================================================
+
+local HUB_URL = "${origin}/hub"
+
+local function loadHub()
+    local placeId = tostring(game.PlaceId)
+    local url = HUB_URL .. "?game=" .. placeId
+
+    local ok, result = pcall(game.HttpGet, game, url)
+
+    if not ok then
+        warn("[ScriptHub] Gagal connect ke server: " .. tostring(result))
+        return
+    end
+
+    -- Cek apakah response adalah error message
+    if result:sub(1, 2) == "--" then
+        local errMsg = result:match("^%-%- Error: (.+)") or result
+        warn("[ScriptHub] " .. errMsg)
+        pcall(function()
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "ScriptHub",
+                Text = errMsg,
+                Duration = 6
+            })
+        end)
+        return
+    end
+
+    -- Load dan jalankan script
+    local fn, parseErr = loadstring(result)
+    if not fn then
+        warn("[ScriptHub] Parse error: " .. tostring(parseErr))
+        return
+    end
+
+    local runOk, runErr = pcall(fn)
+    if not runOk then
+        warn("[ScriptHub] Runtime error: " .. tostring(runErr))
+    end
+end
+
+loadHub()`;
+
+  const el = document.getElementById('loader-full-code');
+  if (el) el.textContent = code;
+}
+
 async function apiFetch(url, opts = {}) {
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN },
-    ...opts
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Request gagal');
-  }
+  const res = await fetch(url, { headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN }, ...opts });
+  if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Request gagal'); }
   return res.json();
 }
 
-// ---- PANELS ----
 function showPanel(name, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   el.classList.add('active');
-  const titles = {dashboard:'Dashboard', games:'Games', scripts:'Scripts', keys:'Key System', logs:'Execute Logs', obfuscator:'Obfuscator', loader:'Loader Template'};
+  const titles = { dashboard:'Dashboard', games:'Games', scripts:'Scripts', logs:'Execute Logs', obfuscator:'Obfuscator', loader:'Hub Loader' };
   document.getElementById('topbar-title').textContent = titles[name] || name;
-
   if (name === 'dashboard') loadStats();
   if (name === 'games') loadGames();
   if (name === 'scripts') loadScripts();
-  if (name === 'keys') loadKeys();
   if (name === 'logs') loadLogs();
+  if (name === 'loader') renderHubInfo();
 }
 
-// ---- TOAST ----
 function toast(msg, type = 'info') {
   const el = document.createElement('div');
   el.className = 'toast-item ' + type;
@@ -1091,46 +524,35 @@ function toast(msg, type = 'info') {
   setTimeout(() => el.remove(), 3500);
 }
 
-// ---- MODAL ----
 function openModal(id) {
-  if (id === 'modal-add-script' || id === 'modal-gen-key') fillGameSelects();
+  if (id === 'modal-add-script') fillGameSelects();
   document.getElementById(id).classList.add('open');
 }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 function fillGameSelects() {
   const opts = gamesCache.map(g => `<option value="${g.id}">${g.name} (${g.placeId})</option>`).join('');
-  const selects = ['script-game', 'key-game'];
-  selects.forEach(id => {
-    const el = document.getElementById(id);
-    const base = id === 'key-game' ? '<option value="">Semua Game</option>' : '<option value="">-- Pilih Game --</option>';
-    if (el) el.innerHTML = base + opts;
-  });
+  const el = document.getElementById('script-game');
+  if (el) el.innerHTML = '<option value="">-- Pilih Game --</option>' + opts;
 }
 
-// ---- STATS ----
 async function loadStats() {
   try {
     const s = await apiFetch('/api/stats');
-    document.getElementById('s-totalKeys').textContent = s.totalKeys;
-    document.getElementById('s-activeKeys').textContent = s.activeKeys;
     document.getElementById('s-totalScripts').textContent = s.totalScripts;
+    document.getElementById('s-activeScripts').textContent = s.activeScripts;
     document.getElementById('s-totalGames').textContent = s.totalGames;
     document.getElementById('s-totalExec').textContent = s.totalExecutions;
     document.getElementById('s-todayExec').textContent = s.executionsToday;
   } catch(e) { toast(e.message, 'error'); }
 }
 
-// ---- GAMES ----
 async function loadGames() {
   try {
     const games = await apiFetch('/api/games');
     gamesCache = games;
     const tbody = document.getElementById('games-tbody');
-    if (!games.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">🎮</div>Belum ada game.</td></tr>';
-      return;
-    }
+    if (!games.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">🎮</div>Belum ada game. Tambah game dulu.</td></tr>'; return; }
     tbody.innerHTML = games.map(g => `
       <tr>
         <td><strong>${g.name}</strong></td>
@@ -1138,11 +560,8 @@ async function loadGames() {
         <td style="color:var(--text2)">${g.description || '—'}</td>
         <td><span class="badge ${g.active?'badge-green':'badge-red'}">${g.active?'ACTIVE':'OFF'}</span></td>
         <td>${fmtDate(g.createdAt)}</td>
-        <td class="actions">
-          <button class="btn btn-danger btn-sm" onclick="deleteGame('${g.id}')">🗑</button>
-        </td>
-      </tr>
-    `).join('');
+        <td class="actions"><button class="btn btn-danger btn-sm" onclick="deleteGame('${g.id}')">🗑</button></td>
+      </tr>`).join('');
   } catch(e) { toast(e.message, 'error'); }
 }
 
@@ -1155,49 +574,32 @@ async function addGame() {
     await apiFetch('/api/games', { method: 'POST', body: JSON.stringify({ name, placeId, description }) });
     toast('Game berhasil ditambahkan!', 'success');
     closeModal('modal-add-game');
-    document.getElementById('game-name').value = '';
-    document.getElementById('game-placeid').value = '';
-    document.getElementById('game-desc').value = '';
+    ['game-name','game-placeid','game-desc'].forEach(id => document.getElementById(id).value = '');
     loadGames();
   } catch(e) { toast(e.message, 'error'); }
 }
 
 async function deleteGame(id) {
   if (!confirm('Hapus game ini?')) return;
-  try {
-    await apiFetch('/api/games/' + id, { method: 'DELETE' });
-    toast('Game dihapus', 'success');
-    loadGames();
-  } catch(e) { toast(e.message, 'error'); }
+  try { await apiFetch('/api/games/' + id, { method: 'DELETE' }); toast('Game dihapus', 'success'); loadGames(); }
+  catch(e) { toast(e.message, 'error'); }
 }
 
-// ---- SCRIPTS ----
 async function loadScripts() {
   try {
     const [scripts, games] = await Promise.all([apiFetch('/api/scripts'), apiFetch('/api/games')]);
     const gmap = Object.fromEntries(games.map(g => [g.id, g.name]));
     const tbody = document.getElementById('scripts-tbody');
-    if (!scripts.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="icon">📜</div>Belum ada script.</td></tr>';
-      return;
-    }
+    if (!scripts.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">📜</div>Belum ada script.</td></tr>'; return; }
     tbody.innerHTML = scripts.map(s => `
       <tr>
         <td><strong>${s.name}</strong></td>
         <td>${gmap[s.gameId] || s.gameId}</td>
-        <td><span class="badge ${s.requireKey?'badge-purple':'badge-yellow'}">${s.requireKey?'KEY REQUIRED':'FREE'}</span></td>
         <td><span class="badge ${s.obfuscated?'badge-cyan':'badge-yellow'}">${s.obfuscated?'OBFUSCATED':'RAW'}</span></td>
         <td>${s.executions || 0}</td>
-        <td>
-          <span class="badge ${s.active?'badge-green':'badge-red'}" style="cursor:pointer" onclick="toggleScript('${s.id}', ${s.active})">
-            ${s.active?'ACTIVE':'OFF'}
-          </span>
-        </td>
-        <td class="actions">
-          <button class="btn btn-danger btn-sm" onclick="deleteScript('${s.id}')">🗑</button>
-        </td>
-      </tr>
-    `).join('');
+        <td><span class="badge ${s.active?'badge-green':'badge-red'}" style="cursor:pointer" onclick="toggleScript('${s.id}',${s.active})">${s.active?'ACTIVE':'OFF'}</span></td>
+        <td class="actions"><button class="btn btn-danger btn-sm" onclick="deleteScript('${s.id}')">🗑</button></td>
+      </tr>`).join('');
   } catch(e) { toast(e.message, 'error'); }
 }
 
@@ -1206,151 +608,51 @@ async function addScript() {
   const gameId = document.getElementById('script-game').value;
   const code = document.getElementById('script-code').value.trim();
   const obfuscate = document.getElementById('script-obf').checked;
-  const requireKey = document.getElementById('script-key').checked;
   const obfuscatePreset = document.getElementById('script-preset').value;
-
   if (!name || !gameId || !code) return toast('Nama, game, dan kode wajib diisi', 'error');
-
   const btn = document.getElementById('btn-upload-script');
   btn.textContent = obfuscate ? '⏳ Obfuscating...' : '⏳ Uploading...';
   btn.disabled = true;
-
   try {
-    await apiFetch('/api/scripts', { method: 'POST', body: JSON.stringify({ name, gameId, code, obfuscate, obfuscatePreset, requireKey }) });
+    await apiFetch('/api/scripts', { method: 'POST', body: JSON.stringify({ name, gameId, code, obfuscate, obfuscatePreset }) });
     toast('Script berhasil diupload!', 'success');
     closeModal('modal-add-script');
     document.getElementById('script-name').value = '';
     document.getElementById('script-code').value = '';
     loadScripts();
   } catch(e) { toast(e.message, 'error'); }
-  finally {
-    btn.textContent = '📤 Upload Script';
-    btn.disabled = false;
-  }
+  finally { btn.textContent = '📤 Upload Script'; btn.disabled = false; }
 }
 
 async function toggleScript(id, current) {
-  try {
-    await apiFetch('/api/scripts/' + id, { method: 'PUT', body: JSON.stringify({ active: !current }) });
-    loadScripts();
-  } catch(e) { toast(e.message, 'error'); }
+  try { await apiFetch('/api/scripts/' + id, { method: 'PUT', body: JSON.stringify({ active: !current }) }); loadScripts(); }
+  catch(e) { toast(e.message, 'error'); }
 }
 
 async function deleteScript(id) {
   if (!confirm('Hapus script ini?')) return;
-  try {
-    await apiFetch('/api/scripts/' + id, { method: 'DELETE' });
-    toast('Script dihapus', 'success');
-    loadScripts();
-  } catch(e) { toast(e.message, 'error'); }
+  try { await apiFetch('/api/scripts/' + id, { method: 'DELETE' }); toast('Script dihapus', 'success'); loadScripts(); }
+  catch(e) { toast(e.message, 'error'); }
 }
 
-// ---- KEYS ----
-async function loadKeys() {
-  try {
-    const [keys, games] = await Promise.all([apiFetch('/api/keys'), apiFetch('/api/games')]);
-    const gmap = Object.fromEntries(games.map(g => [g.id, g.name]));
-    const tbody = document.getElementById('keys-tbody');
-    if (!keys.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="icon">🔑</div>Belum ada key.</td></tr>';
-      return;
-    }
-    const now = new Date();
-    tbody.innerHTML = keys.map(k => {
-      const expired = k.expiresAt && new Date(k.expiresAt) < now;
-      const statusBadge = !k.active ? 'badge-red' : expired ? 'badge-yellow' : 'badge-green';
-      const statusText = !k.active ? 'REVOKED' : expired ? 'EXPIRED' : 'ACTIVE';
-      return `
-      <tr>
-        <td style="font-size:10px;letter-spacing:0.5px;color:var(--accent)">${k.key}</td>
-        <td>${k.gameId ? (gmap[k.gameId]||k.gameId) : '<span style="color:var(--text3)">All Games</span>'}</td>
-        <td style="font-size:10px">${k.hwid ? '<span style="color:var(--yellow)">🔒 BOUND</span>' : '<span style="color:var(--text3)">Free</span>'}</td>
-        <td>${k.uses || 0}</td>
-        <td style="font-size:10px">${k.expiresAt ? fmtDate(k.expiresAt) : '<span style="color:var(--green)">∞ Permanent</span>'}</td>
-        <td><span class="badge ${statusBadge}">${statusText}</span></td>
-        <td class="actions">
-          ${k.hwid ? `<button class="btn btn-ghost btn-sm" onclick="resetHwid('${k.id}')" title="Reset HWID">↻</button>` : ''}
-          ${k.active ? `<button class="btn btn-danger btn-sm" onclick="revokeKey('${k.id}')">Revoke</button>` : ''}
-          <button class="btn btn-danger btn-sm" onclick="deleteKey('${k.id}')">🗑</button>
-        </td>
-      </tr>
-    `}).join('');
-  } catch(e) { toast(e.message, 'error'); }
-}
-
-async function generateKeys() {
-  const count = parseInt(document.getElementById('key-count').value) || 1;
-  const gameId = document.getElementById('key-game').value || null;
-  const prefix = document.getElementById('key-prefix').value || 'SCR';
-  const expireDays = document.getElementById('key-expire').value || null;
-  const note = document.getElementById('key-note').value || '';
-
-  try {
-    const keys = await apiFetch('/api/keys/generate', { method: 'POST', body: JSON.stringify({ count, gameId, prefix, expireDays, note }) });
-    toast(`✅ ${keys.length} key berhasil dibuat!`, 'success');
-    closeModal('modal-gen-key');
-    loadKeys();
-    // Copy first key if single
-    if (keys.length === 1) {
-      navigator.clipboard.writeText(keys[0].key).catch(() => {});
-      toast('Key dicopy ke clipboard: ' + keys[0].key, 'success');
-    }
-  } catch(e) { toast(e.message, 'error'); }
-}
-
-async function revokeKey(id) {
-  if (!confirm('Revoke key ini?')) return;
-  try {
-    await apiFetch('/api/keys/' + id + '/revoke', { method: 'POST' });
-    toast('Key direvoke', 'success');
-    loadKeys();
-  } catch(e) { toast(e.message, 'error'); }
-}
-
-async function resetHwid(id) {
-  try {
-    await apiFetch('/api/keys/' + id + '/reset-hwid', { method: 'POST' });
-    toast('HWID direset', 'success');
-    loadKeys();
-  } catch(e) { toast(e.message, 'error'); }
-}
-
-async function deleteKey(id) {
-  if (!confirm('Hapus key ini permanen?')) return;
-  try {
-    await apiFetch('/api/keys/' + id, { method: 'DELETE' });
-    toast('Key dihapus', 'success');
-    loadKeys();
-  } catch(e) { toast(e.message, 'error'); }
-}
-
-// ---- LOGS ----
 async function loadLogs() {
   try {
     const logs = await apiFetch('/api/logs');
     const tbody = document.getElementById('logs-tbody');
-    if (!logs.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="icon">📋</div>Belum ada log.</td></tr>';
-      return;
-    }
+    if (!logs.length) { tbody.innerHTML = '<tr><td colspan="3" class="empty-state"><div class="icon">📋</div>Belum ada log.</td></tr>'; return; }
     tbody.innerHTML = logs.slice(0,200).map(l => `
       <tr>
         <td>${fmtDate(l.timestamp)}</td>
         <td>${l.gameName || l.gameId}</td>
-        <td style="font-size:10px;color:var(--accent)">${l.keyUsed}</td>
-        <td style="font-size:10px;color:var(--text3)">${(l.hwid||'').slice(0,16)}${l.hwid&&l.hwid.length>16?'...':''}</td>
         <td style="font-size:10px;color:var(--text3)">${l.ip || '—'}</td>
-      </tr>
-    `).join('');
+      </tr>`).join('');
   } catch(e) { toast(e.message, 'error'); }
 }
 
-// ---- OBFUSCATOR ----
 async function runObfuscate() {
   const code = document.getElementById('obf-input').value.trim();
   const preset = document.getElementById('obf-preset').value;
   if (!code) return toast('Input tidak boleh kosong', 'error');
-
   document.getElementById('obf-output-label').textContent = '⏳ Obfuscating...';
   try {
     const res = await apiFetch('/obfuscate', { method: 'POST', body: JSON.stringify({ code, preset }) });
@@ -1369,83 +671,22 @@ function copyObf() {
   navigator.clipboard.writeText(txt).then(() => toast('Copied!', 'success'));
 }
 
-// ---- LOADER TEMPLATE ----
-function renderLoaderCode() {
-  const origin = window.location.origin;
-  const code = `-- ============================================
--- ScriptLoader Universal Loader
--- Compatible dengan semua game yang terdaftar
--- Ganti PLACE_ID dengan ID game Roblox kamu
--- ============================================
-
-local SERVER_URL = "${origin}"
-local PLACE_ID = tostring(game.PlaceId)
-
--- Key system: minta user input atau simpan di script
-local KEY = "SCR-XXXX-XXXX-XXXX-XXXX" -- ganti dengan key user
-
--- Optional: HWID binding (gunakan unik ID device)
-local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-
--- Build URL
-local loadUrl = SERVER_URL .. "/load"
-    .. "?key=" .. KEY
-    .. "&game=" .. PLACE_ID
-    .. "&hwid=" .. HWID
-
--- Load script dari server
-local ok, result = pcall(function()
-    local response = game:HttpGet(loadUrl)
-    return response
-end)
-
-if not ok then
-    warn("[ScriptLoader] Gagal connect ke server: " .. tostring(result))
-    return
-end
-
-if result:sub(1,2) == "--" then
-    -- Mulai dengan comment = error message dari server
-    local errMsg = result:match("^%-%- Error: (.+)") or result
-    warn("[ScriptLoader] " .. errMsg)
-    
-    -- Tampilkan pesan ke user
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "ScriptLoader",
-        Text = errMsg,
-        Duration = 8
-    })
-    return
-end
-
--- Jalankan script
-local fn, err = loadstring(result)
-if not fn then
-    warn("[ScriptLoader] Parse error: " .. tostring(err))
-    return
-end
-
-local runOk, runErr = pcall(fn)
-if not runOk then
-    warn("[ScriptLoader] Runtime error: " .. tostring(runErr))
-end`;
-
-  document.getElementById('loader-code').textContent = code;
+function copyOneliner() {
+  const txt = document.getElementById('hub-oneliner').textContent;
+  navigator.clipboard.writeText(txt).then(() => toast('One-liner di-copy! ✅', 'success'));
 }
 
-function copyLoader() {
-  const code = document.getElementById('loader-code').textContent;
-  navigator.clipboard.writeText(code).then(() => toast('Loader script di-copy!', 'success'));
+function copyFullLoader() {
+  const txt = document.getElementById('loader-full-code').textContent;
+  navigator.clipboard.writeText(txt).then(() => toast('Full loader di-copy! ✅', 'success'));
 }
 
-// ---- UTILS ----
 function fmtDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
   return d.toLocaleDateString('id-ID') + ' ' + d.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
 }
 
-// ---- Close modal on overlay click ----
 document.querySelectorAll('.modal-overlay').forEach(el => {
   el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
 });

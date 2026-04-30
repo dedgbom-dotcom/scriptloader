@@ -182,6 +182,9 @@
       </div>
       <div class="nav-group">
         <div class="nav-group-label">Management</div>
+        <div class="nav-item" onclick="showPanel('loader',this)">
+          <span class="nav-icon">💾</span> Hub Loader
+        </div>
         <div class="nav-item" onclick="showPanel('games',this)">
           <span class="nav-icon">🎮</span> Games
         </div>
@@ -193,9 +196,6 @@
         <div class="nav-group-label">Tools</div>
         <div class="nav-item" onclick="showPanel('obfuscator',this)">
           <span class="nav-icon">🔐</span> Obfuscator
-        </div>
-        <div class="nav-item" onclick="showPanel('loader',this)">
-          <span class="nav-icon">💾</span> Hub Loader
         </div>
       </div>
     </nav>
@@ -244,15 +244,7 @@
           </div>
         </div>
 
-        <div class="hub-box">
-          <h3>📡 HUB ENDPOINT — 1 loadstring untuk semua game</h3>
-          <div class="hub-url" id="hub-endpoint-url">loading...</div>
-          <div style="font-size:11px;color:var(--text2);font-family:var(--font-mono);margin-bottom:8px;">
-            Copy loadstring di bawah → paste ke executor. Otomatis deteksi game dari <code style="color:var(--accent)">game.PlaceId</code>
-          </div>
-          <div class="hub-loader-oneliner" id="hub-oneliner" onclick="copyOneliner()" title="Click to copy">loading...</div>
-          <div class="hub-hint">↑ Click untuk copy · Server otomatis kirim script sesuai game yang kamu mainkan</div>
-        </div>
+
       </div>
 
       <!-- GAMES -->
@@ -335,19 +327,20 @@
         <div class="section-header">
           <span class="section-title">// hub loader template</span>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-ghost btn-sm" onclick="copyOneliner()">📋 Copy One-liner</button>
-            <button class="btn btn-ghost btn-sm" onclick="copyFullLoader()">📋 Copy Full Script</button>
+            <button class="btn btn-primary btn-sm" onclick="generateLoader()">⚡ Generate Loader</button>
+            <button class="btn btn-ghost btn-sm" id="btn-copy-loader" style="display:none" onclick="copyFullLoader()">📋 Copy</button>
           </div>
         </div>
 
-        <div class="hub-box" style="margin-bottom:16px;">
-          <h3>⚡ ONE-LINER — Paste langsung ke executor</h3>
-          <div class="hub-loader-oneliner" id="loader-oneliner-2" onclick="copyOneliner()" title="Click to copy">loading...</div>
-          <div class="hub-hint" style="margin-top:6px;">↑ Cukup 1 baris ini. Auto-detect game dari PlaceId.</div>
+        <div id="loader-empty-state" style="text-align:center;padding:60px 20px;color:var(--text3);font-family:var(--font-mono);font-size:12px;">
+          <div style="font-size:36px;margin-bottom:12px;">💾</div>
+          Klik <strong style="color:var(--accent)">Generate Loader</strong> untuk membuat script loader.
         </div>
 
-        <div class="section-title" style="font-size:11px;margin-bottom:8px;">FULL SCRIPT (dengan error handling)</div>
-        <div class="code-box" id="loader-full-code" onclick="copyFullLoader()">-- Loading...</div>
+        <div id="loader-result" style="display:none;">
+          <div class="section-title" style="font-size:11px;margin-bottom:8px;">LOADER SCRIPT — click untuk copy</div>
+          <div class="code-box" id="loader-full-code" onclick="copyFullLoader()"></div>
+        </div>
       </div>
 
     </div>
@@ -428,22 +421,10 @@ function init() {
   loadGames();
   setInterval(() => document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('id-ID'), 1000);
   document.getElementById('topbar-time').textContent = new Date().toLocaleTimeString('id-ID');
-  renderHubInfo();
 }
 
-function renderHubInfo() {
+function generateLoader() {
   const origin = window.location.origin;
-  const hubUrl = `${origin}/hub?game=PLACE_ID`;
-  const oneliner = `loadstring(game:HttpGet("${origin}/hub?game="..game.PlaceId))()`;
-  document.getElementById('hub-endpoint-url').textContent = hubUrl;
-  document.getElementById('hub-oneliner').textContent = oneliner;
-  if (document.getElementById('loader-oneliner-2'))
-    document.getElementById('loader-oneliner-2').textContent = oneliner;
-  renderFullLoader(origin);
-}
-
-function renderFullLoader(origin) {
-  origin = origin || window.location.origin;
   const code = `-- ================================================
 -- ScriptHub Universal Loader
 -- 1 loadstring untuk semua game yang terdaftar
@@ -492,8 +473,11 @@ end
 
 loadHub()`;
 
-  const el = document.getElementById('loader-full-code');
-  if (el) el.textContent = code;
+  document.getElementById('loader-full-code').textContent = code;
+  document.getElementById('loader-empty-state').style.display = 'none';
+  document.getElementById('loader-result').style.display = 'block';
+  document.getElementById('btn-copy-loader').style.display = '';
+  toast('Loader berhasil di-generate! ✅', 'success');
 }
 
 async function apiFetch(url, opts = {}) {
@@ -513,7 +497,6 @@ function showPanel(name, el) {
   if (name === 'games') loadGames();
   if (name === 'scripts') loadScripts();
   if (name === 'logs') loadLogs();
-  if (name === 'loader') renderHubInfo();
 }
 
 function toast(msg, type = 'info') {
@@ -671,14 +654,10 @@ function copyObf() {
   navigator.clipboard.writeText(txt).then(() => toast('Copied!', 'success'));
 }
 
-function copyOneliner() {
-  const txt = document.getElementById('hub-oneliner').textContent;
-  navigator.clipboard.writeText(txt).then(() => toast('One-liner di-copy! ✅', 'success'));
-}
-
 function copyFullLoader() {
   const txt = document.getElementById('loader-full-code').textContent;
-  navigator.clipboard.writeText(txt).then(() => toast('Full loader di-copy! ✅', 'success'));
+  if (!txt) return toast('Generate loader dulu!', 'error');
+  navigator.clipboard.writeText(txt).then(() => toast('Loader di-copy! ✅', 'success'));
 }
 
 function fmtDate(iso) {

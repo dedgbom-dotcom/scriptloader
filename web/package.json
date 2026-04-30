@@ -1,13 +1,13 @@
 {
-  "name": "scriptloader-web",
+  "name": "scriptloader",
   "version": "1.0.0",
-  "description": "ScriptLoader Platform Web Dashboard - Multi-game Lua Script Loader",
+  "description": "Anti-skid Roblox script loader",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "dotenv": "^16.0.0"
   }
 }

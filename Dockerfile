@@ -1,7 +1,7 @@
 FROM node:18-slim
 
 RUN apt-get update && \
-    apt-get install -y lua5.1 && \
+    apt-get install -y lua5.1 openssl && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

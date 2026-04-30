@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prometheus Obfuscator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --surface: #0f1318;
+      --surface2: #151b22;
+      --border: #1e2a38;
+      --accent: #f7611e;
+      --accent2: #ff8c42;
+      --text: #cdd9e5;
+      --text-dim: #5a6a7a;
+      --green: #39d353;
+      --red: #f85149;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Rajdhani', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--accent);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      animation: pulse-hex 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-hex {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(247,97,30,0); }
+      50% { box-shadow: 0 0 20px 4px rgba(247,97,30,0.4); }
+    }
+
+    .logo-text h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-family: var(--mono);
+    }
+
+    .badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 4px 10px;
+      letter-spacing: 1px;
+    }
+
+    main {
+      flex: 1;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Controls bar */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: var(--mono);
+    }
+
+    .preset-btns {
+      display: flex;
+      gap: 2px;
+    }
+
+    .preset-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 7px 16px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.15s;
+      text-transform: uppercase;
+    }
+
+    .preset-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .preset-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .btn-obfuscate {
+      margin-left: auto;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: 10px 32px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    }
+
+    .btn-obfuscate:hover:not(:disabled) {
+      background: var(--accent2);
+      transform: translateY(-1px);
+    }
+
+    .btn-obfuscate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-obfuscate .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+    }
+
+    .btn-obfuscate.loading .spinner { display: inline-block; }
+    .btn-obfuscate.loading .btn-text { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Editor grid */
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .editor-panel {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      min-height: 460px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .panel-title {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: var(--mono);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+
+    .dot.orange { background: var(--accent); }
+    .dot.green { background: var(--green); }
+
+    .panel-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-small {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 4px 10px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.15s;
+    }
+
+    .btn-small:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 16px;
+      resize: none;
+      outline: none;
+      width: 100%;
+      min-height: 400px;
+    }
+
+    textarea::placeholder {
+      color: var(--text-dim);
+    }
+
+    .output-area {
+      flex: 1;
+      position: relative;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .output-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 16px;
+      resize: none;
+      outline: none;
+      width: 100%;
+      min-height: 400px;
+      word-break: break-all;
+      display: none;
+    }
+
+    .output-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--text-dim);
+    }
+
+    .output-placeholder svg {
+      opacity: 0.2;
+    }
+
+    .output-placeholder p {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Status bar */
+    .statusbar {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 32px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-item.success { color: var(--green); }
+    .status-item.error { color: var(--red); }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 60px;
+      right: 32px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      padding: 10px 18px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--green);
+      letter-spacing: 1px;
+      transform: translateX(200%);
+      transition: transform 0.3s ease;
+      z-index: 200;
+    }
+
+    .toast.show { transform: translateX(0); }
+    .toast.error { border-left-color: var(--red); color: var(--red); }
+
+    /* Error display */
+    .error-msg {
+      color: var(--red);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 16px;
+      background: rgba(248,81,73,0.08);
+      border: 1px solid rgba(248,81,73,0.2);
+      margin: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .editor-grid { grid-template-columns: 1fr; }
+      .btn-obfuscate { margin-left: 0; width: 100%; }
+      main { padding: 16px; }
+      header { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔥</div>
+    <div class="logo-text">
+      <h1>Prometheus</h1>
+      <p>Lua Obfuscator</p>
+    </div>
+  </div>
+  <div class="badge">LUA 5.1 / LUAU</div>
+</header>
+
+<main>
+  <!-- Controls -->
+  <div class="controls">
+    <div class="control-group">
+      <span class="control-label">Preset</span>
+      <div class="preset-btns">
+        <button class="preset-btn" data-preset="Minify">Minify</button>
+        <button class="preset-btn" data-preset="Weak">Weak</button>
+        <button class="preset-btn active" data-preset="Medium">Medium</button>
+        <button class="preset-btn" data-preset="Strong">Strong</button>
+      </div>
+    </div>
+    <button class="btn-obfuscate" id="btnObfuscate">
+      <div class="spinner"></div>
+      <span class="btn-text">⚡ Obfuscate</span>
+    </button>
+  </div>
+
+  <!-- Editor -->
+  <div class="editor-grid">
+    <!-- Input -->
+    <div class="editor-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="dot orange"></div>
+          Input — Lua Script
+        </div>
+        <div class="panel-actions">
+          <button class="btn-small" id="btnClear">Clear</button>
+          <button class="btn-small" id="btnSample">Sample</button>
+        </div>
+      </div>
+      <textarea id="inputCode" spellcheck="false" placeholder="-- Paste kode Lua kamu di sini...&#10;&#10;print('Hello, World!')"></textarea>
+    </div>
+
+    <!-- Output -->
+    <div class="editor-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="dot green"></div>
+          Output — Obfuscated
+        </div>
+        <div class="panel-actions">
+          <button class="btn-small" id="btnCopy">Copy</button>
+          <button class="btn-small" id="btnDownload">Download</button>
+        </div>
+      </div>
+      <div class="output-area" id="outputArea">
+        <div class="output-placeholder" id="outputPlaceholder">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <p>Output akan muncul di sini</p>
+        </div>
+        <textarea class="output-textarea" id="outputTextarea" readonly spellcheck="false"></textarea>
+        <div class="error-msg" id="errorMsg" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="statusbar">
+  <div class="status-item" id="statusItem">
+    <div class="status-dot"></div>
+    <span id="statusText">Siap</span>
+  </div>
+  <div class="status-item" id="sizeInfo" style="display:none">
+    <span id="sizeText"></span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let selectedPreset = 'Medium';
+  let outputCode = '';
+
+  // Preset buttons
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedPreset = btn.dataset.preset;
+    });
+  });
+
+  // Sample code
+  document.getElementById('btnSample').addEventListener('click', () => {
+    document.getElementById('inputCode').value = [
+      '-- Contoh script Lua',
+      'local function fibonacci(n)',
+      '  if n <= 1 then return n end',
+      '  return fibonacci(n - 1) + fibonacci(n - 2)',
+      'end',
+      '',
+      'local secretKey = "PROMETHEUS_OBFUSCATOR"',
+      'local results = {}',
+      '',
+      'for i = 1, 10 do',
+      '  table.insert(results, fibonacci(i))',
+      'end',
+      '',
+      'print("Fibonacci sequence:")',
+      'for _, v in ipairs(results) do',
+      '  io.write(v .. " ")',
+      'end',
+      'print()',
+      'print("Key: " .. secretKey)'
+    ].join('\n');
+  });
+
+  // Clear
+  document.getElementById('btnClear').addEventListener('click', () => {
+    document.getElementById('inputCode').value = '';
+  });
+
+  // Obfuscate
+  document.getElementById('btnObfuscate').addEventListener('click', async () => {
+    const code = document.getElementById('inputCode').value.trim();
+    if (!code) { showToast('Kode tidak boleh kosong!', true); return; }
+
+    const btn = document.getElementById('btnObfuscate');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    document.getElementById('outputPlaceholder').style.display = 'flex';
+    document.getElementById('outputTextarea').style.display = 'none';
+    document.getElementById('outputTextarea').value = '';
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('sizeInfo').style.display = 'none';
+
+    // Countdown timer
+    let elapsed = 0;
+    setStatus('Memproses... 0s (' + selectedPreset + ')', '');
+    const statusInterval = setInterval(() => {
+      elapsed++;
+      setStatus('Memproses... ' + elapsed + 's (' + selectedPreset + ')', '');
+    }, 1000);
+
+    try {
+      const controller = new AbortController();
+      const timeoutMs = selectedPreset === 'Strong' ? 600000 : 180000;
+      const fetchTimer = setTimeout(() => controller.abort(), timeoutMs);
+
+      const res = await fetch('/obfuscate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, preset: selectedPreset }),
+        signal: controller.signal
+      });
+
+      clearTimeout(fetchTimer);
+      clearInterval(statusInterval);
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError(data.error || 'Terjadi kesalahan');
+        setStatus('Error', 'error');
+      } else {
+        outputCode = data.result;
+        showOutput(data.result);
+        setStatus('Berhasil! (' + elapsed + 's)', 'success');
+        document.getElementById('sizeInfo').style.display = 'flex';
+        document.getElementById('sizeText').textContent = 'Preset: ' + data.preset + '  |  Ukuran output: ' + data.ratio + '% dari asli';
+        showToast('Obfuscation selesai!');
+      }
+    } catch (e) {
+      clearInterval(statusInterval);
+      if (e.name === 'AbortError') {
+        showError('Timeout — script terlalu besar untuk preset ini. Gunakan preset Medium.');
+        setStatus('Timeout', 'error');
+      } else {
+        showError('Tidak bisa terhubung ke server. Pastikan server masih berjalan.');
+        setStatus('Error koneksi', 'error');
+      }
+    }
+
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  });
+
+  function showOutput(code) {
+    document.getElementById('outputPlaceholder').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+    const ta = document.getElementById('outputTextarea');
+    ta.style.display = 'block';
+    ta.value = code;
+  }
+
+  function showError(msg) {
+    document.getElementById('outputPlaceholder').style.display = 'none';
+    document.getElementById('outputTextarea').style.display = 'none';
+    const err = document.getElementById('errorMsg');
+    err.style.display = 'block';
+    err.textContent = 'Peringatan: ' + msg;
+  }
+
+  function setStatus(text, type) {
+    const el = document.getElementById('statusItem');
+    const txt = document.getElementById('statusText');
+    el.className = 'status-item' + (type ? ' ' + type : '');
+    txt.textContent = text;
+  }
+
+  // Copy
+  document.getElementById('btnCopy').addEventListener('click', () => {
+    if (!outputCode) { showToast('Belum ada output!', true); return; }
+    const ta = document.getElementById('outputTextarea');
+    ta.select();
+    navigator.clipboard.writeText(outputCode).then(() => showToast('Copied!')).catch(() => {
+      document.execCommand('copy');
+      showToast('Copied!');
+    });
+  });
+
+  // Download
+  document.getElementById('btnDownload').addEventListener('click', () => {
+    if (!outputCode) { showToast('Belum ada output!', true); return; }
+    const blob = new Blob([outputCode], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'obfuscated.lua';
+    a.click();
+  });
+
+  // Toast
+  function showToast(msg, isError) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(function() { t.className = 'toast' + (isError ? ' error' : ''); }, 2500);
+  }
+</script>
+</body>
+</html>
